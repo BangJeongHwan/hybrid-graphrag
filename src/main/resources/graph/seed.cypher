@@ -1,0 +1,14 @@
+MERGE (s:Service {id: 'svc:payment'}) SET s += {name: '결제', status: 'APPROVED', confidence: 1.0, source: 'MANUAL', updated_at: 1759449600000};
+MERGE (t:Team {id: 'team:payment-ops'}) SET t += {name: '결제운영팀', channel: '#payment-ops', hours: '평일 09-18', status: 'APPROVED', confidence: 1.0, source: 'MANUAL', updated_at: 1759449600000};
+MATCH (s:Service {id: 'svc:payment'}), (t:Team {id: 'team:payment-ops'}) MERGE (s)-[:OWNED_BY]->(t);
+MERGE (c:Cause {id: 'cause:payment:issuer-declined'}) SET c += {description: '카드사에서 온라인 결제/해외결제 차단 또는 한도 초과', check_method: '카드사 앱에서 온라인 결제 허용 여부 확인', status: 'APPROVED', confidence: 1.0, source: 'MANUAL', updated_at: 1759449600000};
+MERGE (c:Cause {id: 'cause:payment:card-expired'}) SET c += {description: '카드 유효기간 만료', check_method: '카드 실물의 유효기간 확인', status: 'APPROVED', confidence: 1.0, source: 'MANUAL', updated_at: 1759449600000};
+MERGE (so:Solution {id: 'sol:payment:enable-online-pay'}) SET so += {title: '카드사 온라인 결제 허용', steps: ['카드사 앱 실행', '온라인/간편결제 허용 설정', '다시 카드 등록 시도'], audience: 'CUSTOMER', status: 'APPROVED', confidence: 1.0, source: 'MANUAL', updated_at: 1759449600000};
+MERGE (so:Solution {id: 'sol:payment:register-new-card'}) SET so += {title: '유효한 카드로 재등록', steps: ['기존 카드 삭제', '새 카드 정보로 재등록'], audience: 'CUSTOMER', status: 'APPROVED', confidence: 1.0, source: 'MANUAL', updated_at: 1759449600000};
+MERGE (u:UiPath {id: 'ui:payment:card-manage:app'}) SET u += {platform: 'APP', steps: ['마이페이지', '결제수단 관리', '카드 추가'], min_app_version: '5.2.0', deeplink: 'myapp://payment/cards', status: 'APPROVED', confidence: 1.0, source: 'MANUAL', updated_at: 1759449600000};
+MATCH (e:ErrorCode {id: 'err:PAY-4031'}), (c:Cause {id: 'cause:payment:issuer-declined'}) MERGE (e)-[:INDICATES]->(c);
+MATCH (e:ErrorCode {id: 'err:PAY-4032'}), (c:Cause {id: 'cause:payment:card-expired'}) MERGE (e)-[:INDICATES]->(c);
+MATCH (c:Cause {id: 'cause:payment:issuer-declined'}), (so:Solution {id: 'sol:payment:enable-online-pay'}) MERGE (c)-[:RESOLVED_BY {priority: 1}]->(so);
+MATCH (c:Cause {id: 'cause:payment:card-expired'}), (so:Solution {id: 'sol:payment:register-new-card'}) MERGE (c)-[:RESOLVED_BY {priority: 1}]->(so);
+MATCH (so:Solution {id: 'sol:payment:enable-online-pay'}), (u:UiPath {id: 'ui:payment:card-manage:app'}) MERGE (so)-[:LOCATED_AT]->(u);
+MATCH (so:Solution {id: 'sol:payment:enable-online-pay'}), (t:Team {id: 'team:payment-ops'}) MERGE (so)-[:ESCALATES_TO]->(t);

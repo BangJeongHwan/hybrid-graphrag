@@ -1,0 +1,42 @@
+services:
+  falkordb:
+    image: falkordb/falkordb:latest
+    ports: ["6380:6379", "3000:3000"]
+    volumes: [falkordb-data:/data]
+    environment:
+      FALKORDB_ARGS: "--appendonly yes"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    ports: ["5432:5432"]
+    environment:
+      POSTGRES_DB: graphrag
+      POSTGRES_USER: graphrag
+      POSTGRES_PASSWORD: graphrag
+    volumes: [pg-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U graphrag"]
+      interval: 5s
+
+  # 필요할 때만: docker compose --profile models up -d
+  tei-embed:
+    profiles: ["models"]
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-latest
+    command: --model-id BAAI/bge-m3
+    ports: ["8081:80"]
+    volumes: [hf-cache:/data]
+
+  tei-rerank:
+    profiles: ["models"]
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-latest
+    command: --model-id BAAI/bge-reranker-v2-m3
+    ports: ["8082:80"]
+    volumes: [hf-cache:/data]
+
+volumes:
+  falkordb-data:
+  pg-data:
+  hf-cache:

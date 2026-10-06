@@ -1,0 +1,24 @@
+{
+  "service": "payment",
+  "version": "2026.10.01",
+  "errors": [
+    {
+      "code": "PAY-4031",
+      "httpStatus": 422,
+      "name": "CARD_DECLINED_BY_ISSUER",
+      "userMessage": "카드사에서 승인이 거절되었습니다",
+      "operations": [
+        { "operationId": "registerCard", "method": "POST", "path": "/v1/cards", "feature": "카드 등록" }
+      ]
+    },
+    {
+      "code": "PAY-4032",
+      "httpStatus": 422,
+      "name": "CARD_EXPIRED",
+      "userMessage": "유효기간이 지난 카드입니다",
+      "operations": [
+        { "operationId": "registerCard", "method": "POST", "path": "/v1/cards", "feature": "카드 등록" }
+      ]
+    }
+  ]
+}

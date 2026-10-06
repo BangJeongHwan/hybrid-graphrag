@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: hybrid-graphrag
+  data:
+    redis:                      # FalkorDB는 Redis 프로토콜을 쓴다 (호스트 6379는 stockbot-redis가 사용 중)
+      host: localhost
+      port: 6380
+  datasource:
+    url: jdbc:postgresql://localhost:5432/graphrag
+    username: graphrag
+    password: graphrag
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+kg:
+  falkordb:
+    graph-key: support_kg
+  embedding:
+    provider: fake              # fake | tei
+    tei-url: http://localhost:8081
+    dimension: 1024
+  rerank:
+    provider: lexical           # lexical | tei  (reranker 확정 전 기본값)
+    tei-url: http://localhost:8082
+  llm:
+    provider: fake              # fake | anthropic
+    model: claude-sonnet-5-5
+    api-key: ${ANTHROPIC_API_KEY:}
+    max-tokens: 1024
+  retrieval:
+    graph-timeout: 800ms
+    vector-timeout: 800ms
+    link-top-k: 5
+    link-min-similarity: 0.75
+    ambiguity-margin: 0.05
+    vector-top-k: 30
+    max-docs: 5
+    graph-boost: 0.1
+    learning-threshold: 0.6
